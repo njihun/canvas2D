@@ -42,6 +42,7 @@ function drawImage(params) {
     if(innerSize[0]<innerSize[1]){
         //세로 비율 맞추는 용도
         innerSize = [innerSize[1], innerSize[0]];
+        outerSize = [outerSize[1], outerSize[0]];
         screenSize = [screenSize[1], screenSize[0]];
     }
     canvasSize = [innerSize[0], innerSize[0]/ratio[0]*ratio[1]];
@@ -54,7 +55,7 @@ function drawImage(params) {
     let screen = document.getElementById('screen');
     if (canvas.getContext) {
         var ctx = canvas.getContext("2d");
-        if(innerSize[1] !== screenSize[1]){
+        if(innerSize[1] !== screenSize[1] || innerSize[0] !== screenSize[0]){
             ctx.fillStyle = 'red';
             guideDraw('fullscreen');
         }else{
