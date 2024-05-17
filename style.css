@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    user-select: none;
 }
 #screen {
     background-color: black;
@@ -17,13 +18,21 @@ body {
     font-size: 8vh;
 }
 #guide {
-    display: none;
-    position: fixed;
     width: 100%;
     height: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: fixed;
+    color: white;
     text-align: center;
-    line-height: 100vh;
-    background-color: aqua;
+    background-color: rgba(0,0,0,0.5);
+}
+#guide > *:nth-child(2) {
+    background-color: white;
+    color: black;
 }
 @media( orientation: portrait ){
     html {
