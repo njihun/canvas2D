@@ -55,12 +55,13 @@ function drawImage(params) {
     let screen = document.getElementById('screen');
     if (canvas.getContext) {
         var ctx = canvas.getContext("2d");
-        if(innerSize[1] !== screenSize[1] || innerSize[0] !== screenSize[0]){
+        if(!isFullscreen()){
             ctx.fillStyle = 'red';
             guideDraw('fullscreen');
         }else{
             guide.style.display = 'none';
         }
+        console.log(!document.fullscreenElement);
         ctx.fillRect(canvasSize[0]/10, canvasSize[1]/2+canvasSize[0]/10*0.5, canvasSize[0]/10, canvasSize[0]/10);
         ctx.fillRect(canvasSize[0]/10, canvasSize[1]/2-canvasSize[0]/10*1.5, canvasSize[0]/10, canvasSize[0]/10);
         screen.innerHTML = '';
@@ -92,6 +93,12 @@ function guideDraw(condition) {
     }
     guide.style.display = 'flex';
     
+}
+
+function isFullscreen() {
+    return document.fullscreenElement || /* Standard syntax */
+        document.webkitFullscreenElement || /* Safari and Opera syntax */
+        document.msFullscreenElement; /* IE11 syntax */
 }
 
 function fullscreen(element = document.documentElement) {
