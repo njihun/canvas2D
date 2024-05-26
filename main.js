@@ -3,10 +3,19 @@
 //import func 주석처리
 // import { controllerPosition } from "./directionKey.js";
 let blocks = [
-    "./img/blocks/grass.webp"
+    "./img/blocks/grass.webp",
+    "./img/blocks/wood.webp",
 ];
-blocks = [
-    "https://imghotlink.netlify.app/grass.webp"
+// blocks = [
+//     "https://imghotlink.netlify.app/grass.webp",
+//     "https://imghotlink.netlify.app/wood.webp",
+// ];
+maps = [
+    {
+        'name': 'test',
+        'size': [10,10],
+        'blocks': [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0]
+    }
 ];
 let imgs = [];
 let loadedImgCount = 0;
@@ -36,14 +45,14 @@ function drawImage(params) {
     let canvas = document.createElement('canvas');
     let ratio = [20, 9]; //화면 비율 20:9
     innerSize = [window.innerWidth, window.innerHeight];
+    outerSize = [window.outerWidth, window.outerHeight];
     screenSize = [window.screen.width, window.screen.height];
-    // if(window.outerWidth-innerSize[0]>window.outerWidth/5) {
-    //     console.log(1);
-    //     setTimeout(()=>{
-    //         if(window.outerWidth-innerSize[0]>window.outerWidth/5)
-    //         window.close()
-    //     }, 500);
-    // }
+    if(window.outerWidth-window.innerWidth>400) {
+        setTimeout(()=>{
+            if(window.outerWidth-window.innerWidth>400)
+                window.close();
+        }, 400);
+    }
     if (innerSize[0] < innerSize[1]) {
         //세로 비율 맞추는 용도
         innerSize = [innerSize[1], innerSize[0]];
@@ -65,12 +74,16 @@ function drawImage(params) {
         var ctx = canvas.getContext("2d");
         if (!isFullscreen()) {
             ctx.fillStyle = 'red';
-            guideDraw('fullscreen');
+            drawGuide('fullscreen');
+            // return;
         } else {
             guide.style.display = 'none';
         }
-        ctx.fillRect(canvasSize[0] / 10, canvasSize[1] / 2 + canvasSize[0] / 10 * 0.5, canvasSize[0] / 10, canvasSize[0] / 10);
-        ctx.fillRect(canvasSize[0] / 10, canvasSize[1] / 2 - canvasSize[0] / 10 * 1.5, canvasSize[0] / 10, canvasSize[0] / 10);
+        let unitVector = calculateUnitVector(controllerPosX, controllerPosY);
+        charPosi[0] = updatePosition(charPosi[0], unitVector.x1, maps[0].size[0]);
+        charPosi[1] = updatePosition(charPosi[1], unitVector.y1, maps[0].size[1]);
+        drawMap(canvasSize, ctx);
+        drawEntity(canvasSize, ctx);
         controllerPosition(canvasSize, ctx, controllerSize);
         screen.innerHTML = '';
         screen.appendChild(canvas);
@@ -80,7 +93,7 @@ function drawImage(params) {
     }
 }
 
-function guideDraw(condition) {
+function drawGuide(condition) {
     switch (condition) {
         case 'fullscreen':
             guide.style.fontSize = `${canvasSize[0] / 100 * 3}px`;
@@ -103,6 +116,36 @@ function guideDraw(condition) {
     guide.style.display = 'flex';
 
 }
+let charPosi = [0, 0];
+function drawMap(canvasSize, ctx, charPos = [...charPosi], blockSize = canvasSize[0]/10) {
+    let renderRange = [11, 6];//11 6
+    if(renderRange[0]%2==0){
+        charPos[0] = charPosi[0]-0.5;
+    }
+    if(renderRange[1]%2==0){
+        charPos[1] = charPosi[1]+0.5;
+    }
+    let startPos = Math.round(Math.round(charPos[0])-(renderRange[0]-1)/2);
+    let endPos = startPos+Math.round(charPos[1])*maps[0].size[0]-Math.round((renderRange[1]-1)/2)*10;
+    Array(renderRange[0]*renderRange[1]).fill().forEach((element, i) => {
+        try{
+            if (startPos+i%renderRange[0]<0||endPos%maps[0].size[0]!==startPos+i%renderRange[0]) {
+                throw Error();
+            }
+            ctx.drawImage(imgs[maps[0].blocks[endPos]], blockSize*(i%renderRange[0]) + canvasSize[0]/2 - renderRange[0]*blockSize/2 - charPos[0]*blockSize + Math.round(charPos[0])*blockSize, blockSize*Math.floor(i/renderRange[0]) + canvasSize[1]/2 - renderRange[1]*blockSize/2 - charPos[1]*blockSize + Math.round(charPos[1])*blockSize, blockSize, blockSize);
+        }catch(ignore){}
+        endPos += 1;
+        if((i+1)%(renderRange[0])==0){
+            endPos -= renderRange[0];
+            endPos += maps[0].size[0];
+        }
+    });
+}
+
+function drawEntity(canvasSize, ctx, charPos = [0, 0], entitySize = canvasSize[0]/10) {
+    ctx.fillRect((canvasSize[0]-entitySize)/2, (canvasSize[1]-entitySize)/2, entitySize, entitySize);
+    // ctx.drawImage(imgs[0], (canvasSize[0]-entitySize)/2, (canvasSize[1]-entitySize)/2, entitySize, entitySize);
+}
 
 const touchArea = document.querySelector("#screen > div > #ui");
 
@@ -114,6 +157,43 @@ touchArea.addEventListener('touchcancel', handleTouch);
 let controllerId = null;
 let controllerX = [0, 0];
 let controllerY = [0, 0];
+let controllerPosX = 0;
+let controllerPosY = 0;
+/**
+ * 주어진 점 (x, y)에서 원점을 기준으로 반지름이 1인 원의 끝 점의 좌표를 계산하는 함수
+ * @param {number} x - 주어진 점의 x 좌표
+ * @param {number} y - 주어진 점의 y 좌표
+ * @returns {Object} - 반지름이 1인 원의 끝 점의 좌표 { x1, y1 }
+ */
+function calculateUnitVector(x=[...controllerPosX], y=[...controllerPosY]) {
+    // 벡터의 크기(유클리드 거리)를 계산
+    const magnitude = Math.sqrt(x * x + y * y);
+    // 벡터의 크기가 0이면 단위 벡터를 계산할 수 없으므로 예외 처리
+    if (magnitude === 0) {
+        return { x1: 0, y1: 0 };
+    }
+
+    // 단위 벡터의 x, y 좌표를 계산
+    const x1 = x / magnitude;
+    const y1 = y / magnitude;
+
+    // 결과를 객체 형태로 반환
+    return { x1, y1 };
+}
+/**
+ * 좌표를 업데이트하고 경계를 체크하는 함수
+ * @param {number} pos - 현재 위치
+ * @param {number} delta - 변화량
+ * @param {number} max - 최대 값
+ * @returns {number} - 업데이트된 위치
+ */
+function updatePosition(pos, delta, max) {
+    pos = (pos * 10 + delta) / 10;
+    if (pos < 0) return 0;
+    if (pos > max - 1) return max - 1;
+    return pos;
+}
+
 function handleTouch(event) {
     let reverse = false;
     // event.preventDefault();
