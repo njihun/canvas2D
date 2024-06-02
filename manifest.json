@@ -1,0 +1,29 @@
+{
+    "name": "WebBoard: A Drawing App",
+    "short_name": "WebBoard",
+    "id": ".",
+    "start_url": ".",
+    "display": "fullscreen",
+    "description": "WebBoard is your go to application for quick doodles, notes, or sketches!",
+    "lang": "ko-KR",
+    "dir": "auto",
+    "theme_color": "#00AAFF",
+    "background_color": "#00AAFF",
+    "orientation": "landscape",
+    "icons": [
+        {
+            "src": "https://www.pwabuilder.com/assets/icons/icon_512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "prefer_related_applications": true,
+    "shortcuts": [
+        {
+            "name": "문의하기",
+            "url": "mailto:dumpling.copig@gmail.com",
+            "description": "앱에 문제가 있는 경우 이 단축키를 통해 문의할 수 있습니다."
+        }
+    ]
+}

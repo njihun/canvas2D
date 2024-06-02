@@ -3,13 +3,13 @@
 //import func 주석처리
 // import { controllerPosition } from "./directionKey.js";
 let blocks = [
-    "./img/blocks/grass.webp",
-    "./img/blocks/wood.webp",
+    "./imgs/blocks/grass.webp",
+    "./imgs/blocks/wood.webp",
 ];
-// blocks = [
-//     "https://imghotlink.netlify.app/grass.webp",
-//     "https://imghotlink.netlify.app/wood.webp",
-// ];
+blocks = [
+    "https://imghotlink.netlify.app/grass.webp",
+    "https://imghotlink.netlify.app/wood.webp",
+];
 maps = [
     {
         'name': 'test',
@@ -74,7 +74,7 @@ function drawImage(params) {
         var ctx = canvas.getContext("2d");
         if (!isFullscreen()) {
             ctx.fillStyle = 'red';
-            drawGuide('fullscreen');
+            // drawGuide('fullscreen');
             // return;
         } else {
             guide.style.display = 'none';
