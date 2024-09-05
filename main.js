@@ -29,6 +29,10 @@ let outerSize = [window.outerWidth, window.outerHeight];
 let screenSize = [window.screen.width, window.screen.height];
 let canvasSize = [0, 0];
 let controllerSize = 30;
+/**
+ * 초당 프레임 수를 지정합니다.
+ */
+let deltaTime = 1000/60;
 blocks.forEach((element, index) => {
     imgs[index] = new Image();
     imgs[index].src = element;
@@ -38,7 +42,7 @@ function imgLoaded() {
     loadedImgCount += 1;
     if (loadedImgCount == blocks.length) {
         console.log("Image was loaded");
-        setInterval(drawImage, 1000 / 60);
+        setInterval(drawImage, deltaTime);
     }
 }
 function drawImage(params) {
@@ -119,6 +123,7 @@ function drawGuide(condition) {
 let charPosi = [0, 0];
 function drawMap(canvasSize, ctx, charPos = [...charPosi], blockSize = canvasSize[0]/10) {
     let renderRange = [11, 6];//11 6
+    //캐릭터 위치 미세 조정
     if(renderRange[0]%2==0){
         charPos[0] = charPosi[0]-0.5;
     }
@@ -188,12 +193,16 @@ function calculateUnitVector(x=[...controllerPosX], y=[...controllerPosY]) {
  * @returns {number} - 업데이트된 위치
  */
 function updatePosition(pos, delta, max) {
-    pos = (pos * 10 + delta) / 10;
+    pos = (pos * 10 + delta*deltaTime*0.05) / 10;
     if (pos < 0) return 0;
     if (pos > max - 1) return max - 1;
     return pos;
 }
 
+/**
+ * 모든 터치 이벤트를 관리합니다.
+ * @param {Event} event 
+ */
 function handleTouch(event) {
     let reverse = false;
     // event.preventDefault();
