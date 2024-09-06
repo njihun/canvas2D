@@ -204,15 +204,12 @@ function updatePosition(pos, delta, max) {
  * @param {Event} event 
  */
 function handleTouch(event) {
-    let reverse = false;
     // event.preventDefault();
     const touches = event.changedTouches; // 현재 활성화된 모든 터치 지점
     const touchInfo = Array.from(touches).map(touch => {
         const rect = touchArea.getBoundingClientRect();
         if (window.innerWidth < window.innerHeight) {
-            //세로 비율 맞추는 용도
-            reverse = true;
-            return [touch.clientY - rect.top, touch.clientX - rect.left, touch.identifier];
+            return [touch.clientY - rect.top, canvasSize[1] - touch.clientX + rect.left, touch.identifier];
         }
         return [touch.clientX - rect.left, touch.clientY - rect.top, touch.identifier];
     }).forEach((element, i) => {
@@ -220,8 +217,7 @@ function handleTouch(event) {
             case 'touchstart':
                 if (controllerId == null) {
                     //컨트롤러가 안 정해져있을 때
-                    if (reverse && element[0] < canvasSize[1] / 4 * 3 && element[1] < canvasSize[1] / 2
-                        || !reverse && element[0] < canvasSize[1] / 4 * 3 && element[1] > canvasSize[1] / 2) {
+                    if (element[0] < canvasSize[1] / 4 * 3 && element[1] > canvasSize[1] / 2) {
                         //컨트롤러 판정 범위에 들어왔을 때
                         controllerId = element[2];
                         controllerX = [element[0], element[0]];
@@ -313,9 +309,6 @@ function controllerPosition(canvasSize, ctx, originSize = controllerSize, margin
     
     let closestPoint = findClosestPointOnCircle(change[0], change[1], radius);
     [controllerPosX, controllerPosY] = [closestPoint.x, closestPoint.y];
-    if (window.innerWidth < window.innerHeight)
-        // 세로 비율 맞추는 용도
-        [controllerPosX, controllerPosY] = [controllerPosX, -controllerPosY];
     ctx.arc((size) + canvasSize[1] / 100 * Math.min(marginLeft, 50) + controllerPosX, (canvasSize[1] - size) - canvasSize[1] / 100 * Math.min(marginBottom, 50 - originSize / 2) + controllerPosY, canvasSize[1]/100*joystickSize, 0, Math.PI * 2, false);
     ctx.fill();
 }
