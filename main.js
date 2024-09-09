@@ -33,6 +33,11 @@ let controllerSize = 30;
  * 초당 프레임 수를 지정합니다.
  */
 let deltaTime = 1000/60;
+let ratio = [20, 9]; //화면 비율 20:9
+/**
+ * 해상도를 설정합니다. default: null
+ */
+let quality = [300, 135];
 blocks.forEach((element, index) => {
     imgs[index] = new Image();
     imgs[index].src = element;
@@ -47,7 +52,6 @@ function imgLoaded() {
 }
 function drawImage(params) {
     let canvas = document.createElement('canvas');
-    let ratio = [20, 9]; //화면 비율 20:9
     innerSize = [window.innerWidth, window.innerHeight];
     outerSize = [window.outerWidth, window.outerHeight];
     screenSize = [window.screen.width, window.screen.height];
@@ -67,8 +71,14 @@ function drawImage(params) {
     if (canvasSize[1] > innerSize[1]) {
         canvasSize = [innerSize[1] / ratio[1] * ratio[0], innerSize[1]];
     }
-    canvas.width = canvasSize[0];
-    canvas.height = canvasSize[1];
+    if(quality==null||quality[0]>canvasSize[0]){
+        quality = canvasSize;
+    }else if(quality[1]/quality[0]!==ratio[1]/ratio[0]){
+        throw new Error("화면 비율이 일치하지 않습니다.");
+    }
+    canvas.width = quality[0];
+    canvas.height = quality[1];
+    canvas.style.width = canvasSize[0]+'px';
     canvas.style.backgroundColor = 'white';
     let screen = document.querySelector("#screen > div");
     screen.style.width = canvasSize[0] + 'px';
@@ -86,9 +96,9 @@ function drawImage(params) {
         let unitVector = calculateUnitVector(controllerPosX, controllerPosY);
         charPosi[0] = updatePosition(charPosi[0], unitVector.x1, maps[0].size[0]);
         charPosi[1] = updatePosition(charPosi[1], unitVector.y1, maps[0].size[1]);
-        drawMap(canvasSize, ctx);
-        drawEntity(canvasSize, ctx);
-        controllerPosition(canvasSize, ctx, controllerSize);
+        drawMap(quality, ctx);
+        drawEntity(quality, ctx);
+        controllerPosition(quality, ctx, controllerSize);
         screen.innerHTML = '';
         screen.appendChild(canvas);
     } else {
@@ -213,6 +223,10 @@ function handleTouch(event) {
         }
         return [touch.clientX - rect.left, touch.clientY - rect.top, touch.identifier];
     }).forEach((element, i) => {
+        /**
+         * 해상도에 따라 감도가 변하지 않도록 조정하는 역할
+         */
+        let sensitivity = [quality[0] / canvasSize[0], quality[1] / canvasSize[1]];
         switch (event.type) {
             case 'touchstart':
                 if (controllerId == null) {
@@ -220,16 +234,16 @@ function handleTouch(event) {
                     if (element[0] < canvasSize[1] / 4 * 3 && element[1] > canvasSize[1] / 2) {
                         //컨트롤러 판정 범위에 들어왔을 때
                         controllerId = element[2];
-                        controllerX = [element[0], element[0]];
-                        controllerY = [element[1], element[1]];
+                        controllerX = [element[0] * sensitivity[0], element[0] * sensitivity[0]];
+                        controllerY = [element[1] * sensitivity[1], element[1] * sensitivity[1]];
                     }
                 }
                 break;
             case 'touchmove':
                 if (controllerId == element[2]) {
                     //컨트롤러 id 위치 따로 저장해두고 계산할 것
-                    controllerX[1] = element[0];
-                    controllerY[1] = element[1];
+                    controllerX[1] = element[0] * sensitivity[0];
+                    controllerY[1] = element[1] * sensitivity[1];
                 }
                 break;
             case 'touchend':
@@ -278,6 +292,7 @@ function controllerPosition(canvasSize, ctx, originSize = controllerSize, margin
     // 색 채우기
     ctx.fill();
     // 윤곽선 그리기
+    ctx.lineWidth = canvasSize[1]/300;
     ctx.stroke();
 
     ctx.fillStyle = "red";
