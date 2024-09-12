@@ -47,10 +47,10 @@ function imgLoaded() {
     loadedImgCount += 1;
     if (loadedImgCount == blocks.length) {
         console.log("Image was loaded");
-        setInterval(drawImage, deltaTime);
+        setInterval(()=>drawImage(quality), deltaTime);
     }
 }
-function drawImage(params) {
+function drawImage(quality) {
     let canvas = document.createElement('canvas');
     innerSize = [window.innerWidth, window.innerHeight];
     outerSize = [window.outerWidth, window.outerHeight];
@@ -73,7 +73,7 @@ function drawImage(params) {
     }
     if(quality==null||quality[0]>canvasSize[0]){
         quality = canvasSize;
-    }else if(quality[1]/quality[0]!==ratio[1]/ratio[0]){
+    }else if(Number((quality[1]/quality[0]).toFixed(2))!==ratio[1]/ratio[0]){
         throw new Error("화면 비율이 일치하지 않습니다.");
     }
     canvas.width = quality[0];
